@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Anomaly Inspection Lab | interactive CPU inference</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="engine.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<header><span class="eyebrow">RESEARCH WORKBENCH / 01</span>
+<h1>What counts as a defect?</h1>
+<p>Change a synthetic surface. Inspect where a normal-only model disagrees.</p>
+<a href="https://github.com/BLANK-2340/anomaly-inspection-lab">Source, tests &amp; protocol ↗</a></header>
+<main>
+<aside>
+<h2>Design the inspection</h2>
+<form id="controls">
+<label for="sample">Held-out normal surface</label>
+<select id="sample"><option value="0">Seed 30000</option><option value="1">Seed 30001</option><option value="2">Seed 30002</option></select>
+<label for="variant">Residual model</label>
+<select id="variant"><option value="standardized">Spatially standardized</option><option value="raw_residual">Raw residual (ablation)</option></select>
+<label for="shape">Defect footprint</label>
+<select id="shape"><option value="spot">Spot · 4 × 4</option><option value="scratch">Scratch · 1 × 6</option></select>
+<div class="pair"><div><label for="x">Column (0–18)</label><input id="x" type="number" min="0" max="18" step="1" value="5" required></div>
+<div><label for="y">Row (0–18)</label><input id="y" type="number" min="0" max="18" step="1" value="8" required></div></div>
+<label for="strength">Defect intensity: <output id="strength-value">0.35</output></label>
+<input id="strength" type="range" min="-0.5" max="0.5" step="0.01" value="0.35">
+<label for="brightness">Global brightness shift: <output id="brightness-value">0.00</output></label>
+<input id="brightness" type="range" min="-0.15" max="0.15" step="0.01" value="0">
+<button type="submit">Run inspection</button><button id="clean" type="button" class="secondary">Remove defect</button>
+</form>
+<p class="caption">Actual inference runs in your browser on a frozen Python-trained model. No API, upload, server inference or prerecorded predictions.</p>
+</aside>
+<article>
+<section class="result"><span class="eyebrow">CURRENT IMAGE / NOT BENCHMARK ACCURACY</span>
+<h2 id="decision" aria-live="polite">Loading model…</h2><p id="metrics" aria-live="polite"></p></section>
+<div class="panels">
+<figure><canvas id="input" width="24" height="24" aria-label="Perturbed grayscale input"></canvas><figcaption>01 / inspected surface</figcaption></figure>
+<figure><canvas id="heatmap" width="24" height="24" aria-label="Residual heatmap"></canvas><figcaption>02 / residual heatmap · black → orange</figcaption></figure>
+<figure><canvas id="predicted" width="24" height="24" aria-label="Predicted defect mask"></canvas><figcaption>03 / predicted mask</figcaption></figure>
+<figure><canvas id="truth" width="24" height="24" aria-label="Known injected defect mask"></canvas><figcaption>04 / injected defect mask</figcaption></figure>
+</div>
+<section class="explanation"><h2>Read the failure, not just the score.</h2>
+<p>The model learns a mean and sample standard deviation at each pixel from 48 aligned normal images. A separate set of 32 normal images fixes the 95th-percentile image-maximum threshold. Test images never set that threshold.</p>
+<p>Move a weak defect from the quieter left half to the noisier right half. Compare raw and standardized residuals. Then remove the defect and shift overall brightness: an alignment-dependent normal model can flag a harmless acquisition change.</p>
+<p>The mask threshold is the image-level threshold, not an independently tuned segmentation threshold. Heatmap colors use a fixed scale of twice the selected threshold; score values are not probabilities. IoU compares the current predicted mask with the known injection footprint, not real-world defect labels.</p>
+<p><strong>Scope:</strong> original 24 × 24 synthetic textures only. No industrial data, neural model, competitive benchmark, calibration guarantee or GPU result is claimed. The original easy 64-image test showed no advantage from standardization; harder controlled evaluation is still pending.</p>
+</section>
+</article>
+</main><footer>Original implementation · MIT · No external JavaScript libraries or analytics.</footer>
+</body></html>
