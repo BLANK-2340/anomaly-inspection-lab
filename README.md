@@ -5,6 +5,9 @@ normal aligned textures, inject a controlled defect, and inspect the spatial
 residual, thresholded mask and failure cases. This is a statistical CPU baseline,
 not a neural network or industrial benchmark reproduction.
 
+**[Open the public interactive demo](https://blank-2340.github.io/anomaly-inspection-lab/)**
+It was deployed and its core controls verified on November 13, 2026.
+
 ## Run
 
 Python 3.10+; no packages, downloads or accounts required for local inference.
@@ -29,8 +32,8 @@ saved-result visualization and is explicitly labeled as such.
 
 The static site lives in `docs/` and can be hosted by this repository's GitHub
 Pages configuration, with no additional source repository or paid infrastructure.
-Public deployment and live interaction verification must be confirmed separately;
-source publication alone does not establish that a demo URL works.
+Source publication alone does not establish that a demo URL works; the linked
+public deployment above has been separately opened and interaction-tested.
 
 ## Method and question
 
@@ -58,6 +61,21 @@ mean defect IoU 1.0. **There is no demonstrated standardization advantage on
 this easy task.** All train, normal-calibration and test seed sets are disjoint.
 No externally collected data or pretrained weights are used.
 
+## Harder paired evaluation
+
+The [three-run frozen robustness study](STUDY.md) tests lower-contrast defects
+and a brightness shift without adjusting normal-only thresholds. It finds a
+region-dependent trade-off, not a universal gain: weak/quiet mean IoU improves
+from 0 to 0.5137, while strong/noisy IoU decreases from 0.3849 to 0.3250.
+Both variants falsely flag 100% of brightness-shifted normal images. Recorded
+normal false-alarm rates also exceed the nominal 5% calibration setting.
+
+```bash
+python -W error robustness_study.py
+python -W error robustness_study.py --check
+python -W error -m unittest discover -s tests -p 'test_*.py' -v
+```
+
 ## Checks and regeneration
 
 Python 3.10+ and Node 22+ for cross-language tests; no npm dependencies.
@@ -81,12 +99,12 @@ CI runs the same checks. `--check` rejects source/protocol or asset drift.
 - Alignment-dependent, grayscale, tiny original synthetic textures only.
 - The empirical quantile is not a guaranteed future false-positive rate.
 - The image-level threshold is reused for segmentation, not separately optimized.
-- Global brightness/registration changes can cause false alarms. Harder,
-  low-contrast and multi-seed evaluation remains pending.
+- Global brightness changes cause false alarms in the recorded stress test.
+  Registration changes and real-data validation remain untested.
 - Not evidence for industrial deployment, anomaly-detection state of the art,
   neural-model quality, GPU acceleration or real-world generalization.
 - Statistical reference: [NIST normal distribution and parameter estimation](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm).
 - All implementation, textures and masks are original; no third-party source
   or assets are incorporated. MIT license.
 
-See [continuity and remaining acceptance work](PROGRESS.md).
+See [continuity, bounded acceptance and remaining work](PROGRESS.md).

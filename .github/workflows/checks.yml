@@ -16,3 +16,5 @@ jobs:
       - run: python -W error anomaly_lab.py --self-test
       - run: python -W error scripts/build_demo.py --check
       - run: node --test tests/browser_engine.test.cjs
+      - run: python -W error -m unittest discover -s tests -p 'test_*.py' -v
+      - run: python -W error robustness_study.py --check
