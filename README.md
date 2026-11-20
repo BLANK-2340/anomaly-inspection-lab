@@ -76,6 +76,20 @@ python -W error robustness_study.py --check
 python -W error -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
+## Brightness-compensation extension
+
+The [separate CPU brightness study](BRIGHTNESS.md) tests a global-mean residual
+compensator on fresh, fixed held-out identities. Shifted-normal false alarms fall
+from 96/96 to 3/96, but broad-defect mean IoU collapses from 0.68166 to 0.00424.
+Uniform brightness-like defects can be erased along with harmless brightness.
+This is a measured application-assumption trade-off, not a universal improvement.
+**The frozen public demo still uses the original, uncompensated model.**
+
+```bash
+python -W error brightness_study.py
+python -W error brightness_study.py --check
+```
+
 ## Checks and regeneration
 
 Python 3.10+ and Node 22+ for cross-language tests; no npm dependencies.
@@ -100,7 +114,9 @@ CI runs the same checks. `--check` rejects source/protocol or asset drift.
 - The empirical quantile is not a guaranteed future false-positive rate.
 - The image-level threshold is reused for segmentation, not separately optimized.
 - Global brightness changes cause false alarms in the recorded stress test.
-  Registration changes and real-data validation remain untested.
+  The separate compensated CPU variant reduces those alarms but can erase broad
+  defects; it does not update the public demo. Registration changes and real-data
+  validation remain untested.
 - Not evidence for industrial deployment, anomaly-detection state of the art,
   neural-model quality, GPU acceleration or real-world generalization.
 - Statistical reference: [NIST normal distribution and parameter estimation](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm).
